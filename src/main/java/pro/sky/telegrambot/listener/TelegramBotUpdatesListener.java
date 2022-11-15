@@ -39,28 +39,28 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Override
     public int process(List<Update> updates) {
         updates.forEach(update -> {
-            SendMessage greetings = new SendMessage(update.message().chat().id(), "Привет, человек!");
-            String incomeMessage = update.message().text();
-            logger.info("Processing update: {}", update);
-            if (incomeMessage != null && update.message().text().equals("/start")) {
-                telegramBot.execute(greetings);
-            } else {
-                Pattern pattern = Pattern.compile("([0-9\\.\\:\\s]{16})(\\s)([\\W+]+)");
-                NotificationTask task = new NotificationTask();
-                assert incomeMessage != null;
-                Matcher matcher = pattern.matcher(incomeMessage);
-                if (matcher.matches()) {
-                    task.setChatId(update.message().chat().id());
-                    task.setTimeSend(Timestamp.valueOf(LocalDateTime.parse(matcher.group(1),
-                                     DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))).toLocalDateTime());
-                    task.setMessage(matcher.group(3));
-                repository.save(task);
+                    SendMessage greetings = new SendMessage(update.message().chat().id(), "Привет, человек!");
+                    String incomeMessage = update.message().text();
+                    logger.info("Processing update: {}", update);
+
+                    if (incomeMessage != null && update.message().text().equals("/start")) {
+                        telegramBot.execute(greetings);
+                    } else {
+                        Pattern pattern = Pattern.compile("([0-9\\.\\:\\s]{16})(\\s)([\\W+]+)");
+                        NotificationTask task = new NotificationTask();
+                        assert incomeMessage != null;
+                        Matcher matcher = pattern.matcher(incomeMessage);
+
+                        if (matcher.matches()) {
+                            task.setChatId(update.message().chat().id());
+                            task.setTimeSend(Timestamp.valueOf(LocalDateTime.parse(matcher.group(1),
+                                    DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))).toLocalDateTime());
+                            task.setMessage(matcher.group(3));
+                            repository.save(task);
+                        }
+                    }
                 }
-
-
-            }
-        });
+        );
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
-
 }
